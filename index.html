@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patterns, Decisions, and Consequences — Dr. Alok Patel</title>
+<meta name="description" content="A fifteen-chapter AI textbook for Indian undergraduate students, aligned with NEP 2020. No mathematics required — only the willingness to observe carefully and think clearly.">
+<style>
+  :root{
+    --black:#080808;
+    --panel:#0d0d0d;
+    --border:rgba(196,154,60,0.16);
+    --border-strong:rgba(196,154,60,0.32);
+    --parchment:#F0EAD6;
+    --cream:#DDD5C0;
+    --gold:#C49A3C;
+    --gold-dim:#8A6A22;
+    --teal:#2D5A4E;
+    --rust:#7A3820;
+    --muted:#8f877a;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--black);
+    color:var(--cream);
+    font-family:Georgia,'Times New Roman',serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sans{font-family:Inter,system-ui,-apple-system,sans-serif;}
+  a{color:inherit;}
+  img,svg{max-width:100%;display:block;}
+
+  /* ---------- shell ---------- */
+  .wrap{max-width:1040px;margin:0 auto;padding:0 32px;}
+  @media (max-width:640px){.wrap{padding:0 20px;}}
+
+  /* ---------- nav ---------- */
+  .nav{
+    border-bottom:1px solid var(--border);
+    padding:22px 0;
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .nav-mark{
+    font-family:Inter,system-ui,sans-serif;
+    font-size:11.5px;font-weight:600;letter-spacing:0.14em;
+    color:var(--gold);text-transform:uppercase;text-decoration:none;
+  }
+  .nav-links{display:flex;gap:28px;font-family:Inter,system-ui,sans-serif;font-size:12.5px;}
+  .nav-links a{text-decoration:none;color:var(--muted);letter-spacing:0.02em;margin-left:28px;}
+  .nav-links a:first-child{margin-left:0;}
+  .nav-links a:hover{color:var(--parchment);}
+
+  /* ---------- hero ---------- */
+  .hero{padding:76px 0 64px;}
+  .hero-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:56px;align-items:center;}
+  @media (max-width:800px){.hero-grid{grid-template-columns:1fr;gap:8px;}}
+
+  .kicker{
+    font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:600;
+    letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;
+  }
+  .kicker .rule{display:inline-block;width:28px;height:1px;background:var(--gold);
+    vertical-align:middle;margin-right:10px;opacity:0.7;}
+  h1{
+    font-size:clamp(34px,5.4vw,54px);
+    line-height:1.08;font-weight:700;letter-spacing:-0.01em;
+    color:var(--parchment);margin-bottom:18px;
+  }
+  h1 em{color:var(--gold);font-style:normal;}
+  .subtitle{
+    font-family:Inter,system-ui,sans-serif;font-size:16.5px;font-weight:400;
+    color:var(--cream);opacity:0.82;max-width:46ch;margin-bottom:34px;
+  }
+  .byline{margin-bottom:36px;}
+  .byline .name{font-size:16px;color:var(--parchment);margin-bottom:3px;}
+  .byline .role{
+    font-family:Inter,system-ui,sans-serif;font-size:11.5px;letter-spacing:0.08em;
+    color:var(--muted);text-transform:uppercase;
+  }
+
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{
+    font-family:Inter,system-ui,sans-serif;font-size:13.5px;font-weight:600;
+    letter-spacing:0.01em;text-decoration:none;padding:14px 24px;
+    border-radius:2px;display:inline-flex;align-items:center;gap:8px;
+    transition:transform .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--gold);color:#0c0c0c;}
+  .btn-primary:hover{background:#d6ab48;}
+
+  .emblem-box{display:flex;justify-content:center;align-items:center;}
+  .emblem-box svg{width:340px;max-width:78vw;height:auto;
+    animation:emblem-in 1.1s ease-out;}
+  @keyframes emblem-in{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);}}
+  @media (prefers-reduced-motion:reduce){.emblem-box svg{animation:none;}}
+
+  /* ---------- about ---------- */
+  .about{padding:56px 0;border-top:1px solid var(--border);}
+  .about p{
+    font-size:17px;line-height:1.75;color:var(--cream);
+    max-width:74ch;
+  }
+  .about p + p{margin-top:16px;}
+
+  /* ---------- units ---------- */
+  .units{padding:56px 0;border-top:1px solid var(--border);}
+  .section-label{
+    font-family:Inter,system-ui,sans-serif;font-size:11.5px;font-weight:600;
+    letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:32px;
+  }
+  .unit-row{
+    display:flex;gap:24px;align-items:baseline;
+    padding:26px 0;border-top:1px solid var(--border);
+  }
+  .unit-row:last-child{border-bottom:1px solid var(--border);}
+  .unit-num{width:48px;flex:none;}
+  .unit-body{flex:1 1 auto;min-width:0;}
+  .unit-chapters{flex:none;}
+  @media (max-width:640px){
+    .unit-row{flex-wrap:wrap;}
+    .unit-chapters{margin-left:72px;order:3;}
+  }
+  .unit-num{
+    font-family:Georgia,serif;font-size:26px;color:var(--gold-dim);font-weight:700;
+  }
+  .unit-title{font-size:20px;color:var(--parchment);margin-bottom:6px;}
+  .unit-desc{font-family:Inter,system-ui,sans-serif;font-size:13.5px;color:var(--muted);
+    line-height:1.55;max-width:52ch;}
+  .unit-chapters{
+    font-family:Inter,system-ui,sans-serif;font-size:12px;color:var(--teal);
+    letter-spacing:0.03em;white-space:nowrap;
+  }
+
+  /* ---------- author ---------- */
+  .author{padding:56px 0;border-top:1px solid var(--border);}
+  .author-name{font-size:24px;color:var(--gold);margin-bottom:14px;}
+  .author p{font-size:15.5px;line-height:1.75;color:var(--cream);max-width:70ch;}
+  .author-cred{
+    font-family:Inter,system-ui,sans-serif;font-size:12px;color:var(--muted);
+    margin-top:18px;padding-top:18px;border-top:1px solid var(--border);
+    line-height:1.7;
+  }
+  .author-cred strong{color:var(--gold-dim);font-weight:500;}
+
+  /* ---------- footer ---------- */
+  footer{padding:36px 0 48px;border-top:1px solid var(--border);}
+  .footer-inner{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+    font-family:Inter,system-ui,sans-serif;font-size:12px;color:var(--muted);
+  }
+  footer a{text-decoration:none;color:var(--muted);}
+  footer a:hover{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a class="nav-mark" href="#top">Pattern Hunters Series</a>
+    <div class="nav-links">
+      <a href="#units">Contents</a>
+      <a href="#author">Author</a>
+      <a href="PatternHunters_AI_Complete.pdf">Read online</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="kicker"><span class="rule"></span>Textbook for B.Sc. 5th Semester · VAC: AI</div>
+      <h1>Patterns, <em>Decisions</em>,<br>and Consequences</h1>
+      <p class="subtitle">Artificial Intelligence for Indian undergraduate students —
+        a fifteen-chapter course built around one idea: intelligence, human or
+        artificial, is a loop of observing, deciding, acting, and learning.</p>
+
+      <div class="byline">
+        <div class="name">Dr. Alok Patel, Ph.D.</div>
+        <div class="role">Kuchinda College · Sambalpur University</div>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="PatternHunters_AI_Complete.pdf">Read the PDF →</a>
+      </div>
+    </div>
+
+    <div class="emblem-box">
+      <svg viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pattern Hunters emblem: an eye formed from a network of connected nodes">
+        <defs>
+          <radialGradient id="irisG" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#1E3A2E"/>
+            <stop offset="65%" stop-color="#0D1F18"/>
+            <stop offset="100%" stop-color="#050D0A"/>
+          </radialGradient>
+          <radialGradient id="pupilG" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#C49A3C" stop-opacity="1"/>
+            <stop offset="45%" stop-color="#C49A3C" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#C49A3C" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="ambientG" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="#C49A3C" stop-opacity="0.1"/>
+            <stop offset="100%" stop-color="#C49A3C" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="3.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="pupilGlow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="8" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <circle cx="180" cy="180" r="176" fill="url(#ambientG)"/>
+        <path d="M 14 180 Q 90 58 180 52 Q 270 58 346 180 Q 270 302 180 308 Q 90 302 14 180 Z" fill="#0B1610"/>
+        <path d="M 14 180 Q 90 58 180 52 Q 270 58 346 180" fill="none" stroke="#C49A3C" stroke-width="1.4" opacity="0.55"/>
+        <path d="M 14 180 Q 90 302 180 308 Q 270 302 346 180" fill="none" stroke="#C49A3C" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="180" cy="180" r="100" fill="url(#irisG)"/>
+        <circle cx="180" cy="180" r="98"  fill="none" stroke="#C49A3C" stroke-width="0.4" opacity="0.25"/>
+        <circle cx="180" cy="180" r="84"  fill="none" stroke="#2D5A4E" stroke-width="0.5" opacity="0.4"/>
+        <circle cx="180" cy="180" r="70"  fill="none" stroke="#C49A3C" stroke-width="0.3" opacity="0.18"/>
+        <circle cx="180" cy="180" r="52"  fill="none" stroke="#2D5A4E" stroke-width="0.4" opacity="0.3"/>
+        <circle cx="180" cy="98"  r="7" fill="#0D1F18" stroke="#C49A3C" stroke-width="1.4" filter="url(#glow)"/>
+        <circle cx="251" cy="122" r="7" fill="#0D1F18" stroke="#C49A3C" stroke-width="1.4" filter="url(#glow)"/>
+        <circle cx="263" cy="202" r="7" fill="#0D1F18" stroke="#C49A3C" stroke-width="1.4" filter="url(#glow)"/>
+        <circle cx="220" cy="258" r="7" fill="#0D1F18" stroke="#C49A3C" stroke-width="1.4" filter="url(#glow)"/>
+        <circle cx="140" cy="258" r="7" fill="#0D1F18" stroke="#C49A3C" stroke-width="1.4" filter="url(#glow)"/>
+        <circle cx="97"  cy="202" r="7" fill="#0D1F18" stroke="#C49A3C" stroke-width="1.4" filter="url(#glow)"/>
+        <circle cx="109" cy="122" r="7" fill="#0D1F18" stroke="#C49A3C" stroke-width="1.4" filter="url(#glow)"/>
+        <circle cx="180" cy="134" r="5" fill="#0D1F18" stroke="#8A6A22" stroke-width="1.1"/>
+        <circle cx="222" cy="154" r="5" fill="#0D1F18" stroke="#8A6A22" stroke-width="1.1"/>
+        <circle cx="226" cy="210" r="5" fill="#0D1F18" stroke="#8A6A22" stroke-width="1.1"/>
+        <circle cx="180" cy="232" r="5" fill="#0D1F18" stroke="#8A6A22" stroke-width="1.1"/>
+        <circle cx="134" cy="210" r="5" fill="#0D1F18" stroke="#8A6A22" stroke-width="1.1"/>
+        <circle cx="138" cy="154" r="5" fill="#0D1F18" stroke="#8A6A22" stroke-width="1.1"/>
+        <line x1="180" y1="98"  x2="180" y2="134" stroke="#C49A3C" stroke-width="0.7" opacity="0.5"/>
+        <line x1="251" y1="122" x2="222" y2="154" stroke="#C49A3C" stroke-width="0.7" opacity="0.5"/>
+        <line x1="263" y1="202" x2="226" y2="210" stroke="#C49A3C" stroke-width="0.7" opacity="0.5"/>
+        <line x1="220" y1="258" x2="180" y2="232" stroke="#C49A3C" stroke-width="0.7" opacity="0.5"/>
+        <line x1="140" y1="258" x2="180" y2="232" stroke="#C49A3C" stroke-width="0.7" opacity="0.5"/>
+        <line x1="97"  y1="202" x2="134" y2="210" stroke="#C49A3C" stroke-width="0.7" opacity="0.5"/>
+        <line x1="109" y1="122" x2="138" y2="154" stroke="#C49A3C" stroke-width="0.7" opacity="0.5"/>
+        <line x1="180" y1="134" x2="180" y2="164" stroke="#C49A3C" stroke-width="0.8" opacity="0.6"/>
+        <line x1="222" y1="154" x2="188" y2="168" stroke="#C49A3C" stroke-width="0.8" opacity="0.6"/>
+        <line x1="226" y1="210" x2="190" y2="184" stroke="#C49A3C" stroke-width="0.8" opacity="0.6"/>
+        <line x1="180" y1="232" x2="180" y2="196" stroke="#C49A3C" stroke-width="0.8" opacity="0.6"/>
+        <line x1="134" y1="210" x2="170" y2="184" stroke="#C49A3C" stroke-width="0.8" opacity="0.6"/>
+        <line x1="138" y1="154" x2="172" y2="168" stroke="#C49A3C" stroke-width="0.8" opacity="0.6"/>
+        <line x1="180" y1="134" x2="222" y2="154" stroke="#2D5A4E" stroke-width="0.5" opacity="0.45"/>
+        <line x1="222" y1="154" x2="226" y2="210" stroke="#2D5A4E" stroke-width="0.5" opacity="0.45"/>
+        <line x1="226" y1="210" x2="180" y2="232" stroke="#2D5A4E" stroke-width="0.5" opacity="0.45"/>
+        <line x1="180" y1="232" x2="134" y2="210" stroke="#2D5A4E" stroke-width="0.5" opacity="0.45"/>
+        <line x1="134" y1="210" x2="138" y2="154" stroke="#2D5A4E" stroke-width="0.5" opacity="0.45"/>
+        <line x1="138" y1="154" x2="180" y2="134" stroke="#2D5A4E" stroke-width="0.5" opacity="0.45"/>
+        <circle cx="180" cy="180" r="28" fill="#060C09"/>
+        <circle cx="180" cy="180" r="24" fill="url(#pupilG)" filter="url(#pupilGlow)"/>
+        <circle cx="180" cy="180" r="14" fill="#C49A3C" opacity="0.92"/>
+        <circle cx="180" cy="180" r="7"  fill="#F5F0E0"/>
+        <circle cx="176" cy="176" r="2"  fill="#060C09" opacity="0.5"/>
+        <ellipse cx="154" cy="140" rx="9" ry="5.5" fill="white" opacity="0.03" transform="rotate(-25 154 140)"/>
+        <path id="brow" d="M 28 180 Q 104 42 180 36 Q 256 42 332 180" fill="none"/>
+        <text font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="600" letter-spacing="0.26em" fill="#F0EAD6" opacity="0.75">
+          <textPath href="#brow" startOffset="50%" text-anchor="middle">OBSERVE · ANALYSE · ACT</textPath>
+        </text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<section class="about">
+  <div class="wrap">
+    <p>Pattern recognition is the oldest form of intelligence. A student reading
+    a friend's mood from a one-word WhatsApp reply, a child reading a parent's
+    tone before asking for pocket money, and a farmer reading the approaching
+    monsoon are all doing what neural networks do: finding structure in
+    signals and acting on it.</p>
+    <p>This book covers how machines learn, how AI is reshaping human
+    behaviour and society at large, and the ethical questions that follow —
+    grounded throughout in Indian examples, aligned with the Odisha
+    university AI curriculum under NEP 2020. No mathematics required, and no
+    prior programming knowledge assumed. Only the willingness to observe
+    carefully and think clearly.</p>
+  </div>
+</section>
+
+<section class="units" id="units">
+  <div class="wrap">
+    <div class="section-label">Five Units, Fifteen Chapters</div>
+
+    <div class="unit-row">
+      <div class="unit-num">01</div>
+      <div class="unit-body">
+        <div class="unit-title">What Is Intelligence?</div>
+        <div class="unit-desc">Patterns, decisions, and the architecture of intelligent systems.</div>
+      </div>
+      <div class="unit-chapters">Chapters 1–3</div>
+    </div>
+
+    <div class="unit-row">
+      <div class="unit-num">02</div>
+      <div class="unit-body">
+        <div class="unit-title">How Machines Learn</div>
+        <div class="unit-desc">Supervised, unsupervised, and reinforcement learning; neural networks.</div>
+      </div>
+      <div class="unit-chapters">Chapters 4–7</div>
+    </div>
+
+    <div class="unit-row">
+      <div class="unit-num">03</div>
+      <div class="unit-body">
+        <div class="unit-title">AI in the World</div>
+        <div class="unit-desc">Language, vision, and practical AI tools for all three streams.</div>
+      </div>
+      <div class="unit-chapters">Chapters 8–10</div>
+    </div>
+
+    <div class="unit-row">
+      <div class="unit-num">04</div>
+      <div class="unit-body">
+        <div class="unit-title">The Consequences of Intelligence</div>
+        <div class="unit-desc">Bias, surveillance, work, creativity, and AI governance in India.</div>
+      </div>
+      <div class="unit-chapters">Chapters 11–14</div>
+    </div>
+
+    <div class="unit-row">
+      <div class="unit-num">05</div>
+      <div class="unit-body">
+        <div class="unit-title">Making Something</div>
+        <div class="unit-desc">The mini-project as original investigation, from question to presentation.</div>
+      </div>
+      <div class="unit-chapters">Chapter 15</div>
+    </div>
+  </div>
+</section>
+
+<section class="author" id="author">
+  <div class="wrap">
+    <div class="section-label">About the Author</div>
+    <div class="author-name">Alok Patel</div>
+    <p>A researcher with a Ph.D. in Zoology from Utkal University, he has made
+    significant contributions to the development of DNA SNP chips and
+    molecular genetic maps in fishes, with publications in <em>Journal of
+    Genetics</em>, <em>Animal Genetics</em>, and <em>Molecular Ecology
+    Resources</em>. He previously held a tenure-track faculty position at the
+    University of Chile, Santiago, and brings more than fifteen years of
+    teaching experience to the classroom. He serves as a peer reviewer for
+    <em>Molecular Ecology Resources</em>, <em>Molecular Biology Reports</em>,
+    and <em>Reviews in Medical Virology</em>. He is also the author of
+    <em>The Pattern Hunters: The Art of Scientific Thinking</em> and
+    <em>Pattern and Descent: A Textbook of Taxonomy and Evolutionary
+    Biology</em>.</p>
+    <div class="author-cred">
+      <strong>Member, Board of Studies in Zoology</strong>, Sambalpur University
+      &nbsp;·&nbsp;
+      <strong>Principal Investigator</strong>, OSHEC-funded project on earthworm
+      genomics and soil health biomarkers, Western Odisha
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div>© 2026 Alok Patel · Patterns, Decisions, and Consequences</div>
+    <div><a href="https://github.com/The-Pattern-Hunter/Patterns-Decisions-and-Consequences">View repository ↗</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
