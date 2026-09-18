@@ -46,7 +46,7 @@ Epilogue, a Glossary of key terms, and an Index.
 | File | Description |
 |------|--------------|
 |  The complete manuscript — front cover, front matter, all 15 chapters with figures, unit divider pages, Epilogue, Glossary, and Index, through the back cover. Editable in Microsoft Word. |
-| `PatternHunters_Complete.pdf` | A read-through PDF rendering of the same manuscript. |
+| `PatternHunters_AI_Complete.pdf` | A read-through PDF rendering of the same manuscript. |
 
 ## Status
 
